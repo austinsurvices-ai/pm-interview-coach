@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach — PM Interview Practice</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #1C1A19;
+    --panel: #262321;
+    --panel-2: #2E2A27;
+    --line: #423C37;
+    --paper: #EFE7D8;
+    --text: #F2EDE3;
+    --muted: #A79B8C;
+    --gold: #D4A73D;
+    --teal: #4FA893;
+    --red: #C0564A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ink); color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 980px; margin: 0 auto; padding: 48px 24px 100px; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 40px;
+    line-height: 1.08; margin: 0 0 14px; letter-spacing: -0.01em;
+  }
+  .lede { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 560px; margin: 0 0 36px; }
+
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  input[type=text], textarea, select {
+    width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; padding: 12px 14px;
+    outline: none;
+  }
+  input[type=text]:focus, textarea:focus, select:focus { border-color: var(--gold); }
+  textarea { resize: vertical; line-height: 1.55; }
+  .field { margin-bottom: 20px; }
+
+  button {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    border: none; border-radius: 8px; padding: 12px 22px; cursor: pointer;
+    background: var(--gold); color: #1C1A19;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.ghost {
+    background: transparent; color: var(--text); border: 1px solid var(--line);
+  }
+  button.icon-btn {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    font-size: 12.5px; padding: 7px 14px; display: inline-flex; align-items: center; gap: 6px;
+  }
+  button.icon-btn.recording {
+    color: var(--red); border-color: var(--red); animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  .btn-row { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+  .inline-actions { display: flex; gap: 10px; margin: 14px 0 4px; flex-wrap: wrap; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 26px 28px; margin-bottom: 24px;
+  }
+
+  nav.tabs { display: flex; gap: 6px; margin-bottom: 32px; }
+  nav.tabs button {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    padding: 8px 16px; font-size: 13px; border-radius: 20px;
+  }
+  nav.tabs button.active { background: var(--gold); color: #1C1A19; border-color: var(--gold); }
+
+  .focus-tag {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal);
+    border: 1px solid var(--teal); border-radius: 20px; padding: 3px 10px; margin-bottom: 14px;
+  }
+  .question-text {
+    font-family: 'Fraunces', serif; font-size: 24px; line-height: 1.4; font-weight: 600;
+  }
+
+  .loading { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--gold);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Feedback layout */
+  .feedback-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 22px; }
+  @media (max-width: 760px) { .feedback-grid { grid-template-columns: 1fr; } }
+
+  .annotated {
+    font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.75; color: var(--text);
+  }
+  .annotated mark.strength {
+    background: rgba(79,168,147,0.18); color: var(--text); border-bottom: 2px solid var(--teal);
+    padding: 1px 2px; border-radius: 2px; cursor: default;
+  }
+  .annotated mark.issue {
+    background: rgba(192,86,74,0.18); color: var(--text); border-bottom: 2px solid var(--red);
+    padding: 1px 2px; border-radius: 2px; cursor: default;
+  }
+  .note-list { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .note {
+    display: flex; gap: 10px; font-size: 13px; margin-bottom: 10px; line-height: 1.5;
+  }
+  .note .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .note.strength .dot { background: var(--teal); }
+  .note.issue .dot { background: var(--red); }
+  .note .txt { color: var(--muted); }
+  .note .txt b { color: var(--text); font-weight: 600; }
+
+  .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .score-label { width: 118px; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .score-track { flex: 1; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .score-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--gold)); border-radius: 4px; }
+  .score-num { font-family: 'IBM Plex Mono', monospace; font-size: 12px; width: 24px; text-align: right; }
+
+  .overall {
+    font-family: 'Fraunces', serif; font-size: 46px; font-weight: 700; line-height: 1;
+  }
+  .overall-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .flag-box {
+    background: rgba(192,86,74,0.1); border: 1px solid var(--red); border-radius: 8px;
+    padding: 14px 16px; margin-top: 18px; font-size: 13px; line-height: 1.6;
+  }
+  .flag-box .flag-title {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--red); margin-bottom: 8px; font-weight: 600;
+  }
+  .flag-box ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .flag-box li { margin-bottom: 4px; }
+
+  .better-version {
+    background: var(--panel-2); border-left: 3px solid var(--gold); border-radius: 6px;
+    padding: 16px 18px; font-size: 14.5px; line-height: 1.65; color: var(--text); margin-top: 8px;
+  }
+
+  /* Metrics */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 30px; }
+  @media (max-width: 700px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .stat .num { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; }
+  .stat .lbl { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  h2.section-title {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line);
+    padding-bottom: 10px; margin: 0 0 18px;
+  }
+
+  .empty { color: var(--muted); font-size: 14px; }
+
+  .error-box {
+    background: rgba(192,86,74,0.12); border: 1px solid var(--red); border-radius: 8px;
+    padding: 12px 16px; font-size: 13px; color: var(--text); margin-bottom: 18px;
+  }
+</style>
+</head>
+<body>
+<div id="root" class="app"></div>
+
+<script>
+const CRITERIA = [
+  { key: "relevance", label: "Relevance" },
+  { key: "structure", label: "Structure" },
+  { key: "specificity", label: "Specificity" },
+  { key: "business_impact", label: "Business Impact" },
+  { key: "clarity", label: "Clarity" },
+  { key: "ownership", label: "Ownership" },
+  { key: "tradeoffs", label: "Trade-off Reasoning" },
+];
+
+let state = {
+  view: "setup",          // setup | practice | feedback | metrics
+  role: "",
+  context: "",
+  questions: [],
+  currentIndex: 0,
+  answer: "",
+  loading: false,
+  loadingMsg: "",
+  error: null,
+  currentFeedback: null,  // { scores, overall, annotations, betterVersion, flags, confidence }
+  history: [],            // [{question, scores, overall, flags}]
+};
+
+function render() {
+  const root = document.getElementById("root");
+  root.innerHTML = "";
+  if (state.view === "setup") root.appendChild(renderSetup());
+  else if (state.view === "practice") root.appendChild(renderPractice());
+  else if (state.view === "feedback") root.appendChild(renderFeedback());
+  else if (state.view === "metrics") root.appendChild(renderMetrics());
+}
+
+function el(tag, props = {}, children = []) {
+  const e = document.createElement(tag);
+  Object.entries(props).forEach(([k, v]) => {
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  });
+  (Array.isArray(children) ? children : [children]).forEach(c => {
+    if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+
+function tabs(active) {
+  const nav = el("nav", { class: "tabs" });
+  const opts = [["practice", "Practice"], ["metrics", "Metrics"]];
+  opts.forEach(([key, label]) => {
+    const b = el("button", {
+      class: key === active ? "active" : "",
+      onclick: () => { state.view = key; render(); }
+    }, label);
+    if (state.questions.length === 0) b.disabled = true;
+    nav.appendChild(b);
+  });
+  return nav;
+}
+
+// ---------- SETUP ----------
+function renderSetup() {
+  const wrap = el("div");
+  wrap.appendChild(el("p", { class: "eyebrow" }, "AI Interview Coach"));
+  wrap.appendChild(el("h1", {}, "Practice like the feedback actually counts."));
+  wrap.appendChild(el("p", { class: "lede" },
+    "Not just questions — a defined rubric behind every score, a check on when the grading itself might be wrong, and a record of whether you're actually improving."));
+
+  const card = el("div", { class: "card" });
+  const roleField = el("div", { class: "field" }, [
+    el("label", {}, "Role you're interviewing for"),
+    el("input", { type: "text", id: "role-input", placeholder: "e.g. Senior Product Manager, fintech" }),
+  ]);
+  const ctxField = el("div", { class: "field" }, [
+    el("label", {}, "Context (resume summary, focus areas, target company — optional)"),
+    el("textarea", { id: "ctx-input", rows: 4, placeholder: "Paste a resume summary or describe what you want to focus on..." }),
+  ]);
+  card.appendChild(roleField);
+  card.appendChild(ctxField);
+
+  if (state.error) card.appendChild(el("div", { class: "error-box" }, state.error));
+
+  const startBtn = el("button", {
+    onclick: async () => {
+      const role = document.getElementById("role-input").value.trim();
+      if (!role) { state.error = "Enter a role to generate relevant questions."; render(); return; }
+      state.role = role;
+      state.context = document.getElementById("ctx-input").value.trim();
+      state.error = null;
+      await generateQuestions();
+    }
+  }, state.loading ? "Generating..." : "Generate practice questions");
+  startBtn.disabled = state.loading;
+
+  card.appendChild(el("div", { class: "btn-row" }, [startBtn]));
+  if (state.loading) card.appendChild(loadingRow(state.loadingMsg));
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+// ---------- PRACTICE ----------
+function renderPractice() {
+  const wrap = el("div");
+  wrap.appendChild(tabs("practice"));
+
+  const q = state.questions[state.currentIndex];
+  if (!q) { wrap.appendChild(el("p", { class: "empty" }, "No question loaded.")); return wrap; }
+
+  wrap.appendChild(el("p", { class: "eyebrow" }, `Question ${state.currentIndex + 1} of ${state.questions.length}`));
+  const card = el("div", { class: "card" });
+  card.appendChild(el("span", { class: "focus-tag" }, q.focus || "general"));
+  card.appendChild(el("div", { class: "question-text" }, q.question));
+  const speakBtn = el("button", {
+    class: "icon-btn",
+    style: "margin-top:16px;",
+    onclick: () => speakQuestion(q.question),
+  }, "🔊 Read question aloud");
+  card.appendChild(el("div", { class: "inline-actions" }, [speakBtn]));
+  wrap.appendChild(card);
+
+  const answerCard = el("div", { class: "card" });
+  answerCard.appendChild(el("div", { class: "field" }, [
+    el("label", {}, "Your answer"),
+    el("textarea", { id: "answer-input", rows: 8, placeholder: "Answer as you would out loud — structure it, be specific, name the impact..." }, ),
+  ]));
+  document.body._answerDraft = state.answer;
+
+  if (state.error) answerCard.appendChild(el("div", { class: "error-box" }, state.error));
+
+  const submitBtn = el("button", {
+    onclick: async () => {
+      const val = document.getElementById("answer-input").value.trim();
+      if (val.length < 10) { state.error = "Write a fuller answer before submitting."; render(); return; }
+      state.answer = val;
+      state.error = null;
+      await evaluateAnswer();
+    }
+  }, state.loading ? "Scoring..." : "Get feedback");
+  submitBtn.disabled = state.loading;
+
+  const skipBtn = el("button", { class: "ghost", onclick: () => nextQuestion() }, "Skip question");
+
+  answerCard.appendChild(el("div", { class: "btn-row" }, [submitBtn, skipBtn]));
+  if (state.loading) answerCard.appendChild(loadingRow(state.loadingMsg));
+  wrap.appendChild(answerCard);
+
+  setTimeout(() => {
+    const ta = document.getElementById("answer-input");
+    if (ta) ta.value = state.answer || "";
+  }, 0);
+
+  return wrap;
+}
+
+// ---------- FEEDBACK ----------
+function renderFeedback() {
+  const wrap = el("div");
+  wrap.appendChild(tabs("practice"));
+
+  const f = state.currentFeedback;
+  const q = state.questions[state.currentIndex];
+  wrap.appendChild(el("p", { class: "eyebrow" }, "Feedback"));
+  wrap.appendChild(el("div", { class: "question-text", style: "margin-bottom:22px;" }, q.question));
+
+  const grid = el("div", { class: "feedback-grid" });
+
+  // Left: annotated answer
+  const left = el("div", { class: "card" });
+  left.appendChild(el("h2", { class: "section-title" }, "Your answer, marked up"));
+  left.appendChild(el("div", { class: "annotated", html: annotateHtml(state.answer, f.annotations) }));
+
+  const noteList = el("div", { class: "note-list" });
+  (f.annotations || []).forEach(a => {
+    noteList.appendChild(el("div", { class: `note ${a.type}` }, [
+      el("div", { class: "dot" }),
+      el("div", { class: "txt" }, [el("b", {}, a.type === "strength" ? "Strength — " : "Issue — "), a.note]),
+    ]));
+  });
+  left.appendChild(noteList);
+  grid.appendChild(left);
+
+  // Right: scorecard
+  const right = el("div");
+  const scoreCard = el("div", { class: "card" });
+  const overallVal = f.overall.toFixed(1);
+  scoreCard.appendChild(el("div", { class: "overall" }, overallVal + " / 5"));
+  scoreCard.appendChild(el("div", { class: "overall-sub" }, "Overall score"));
+  scoreCard.appendChild(el("div", { style: "height:18px;" }));
+
+  CRITERIA.forEach(c => {
+    const v = f.scores[c.key] || 0;
+    scoreCard.appendChild(el("div", { class: "score-row" }, [
+      el("div", { class: "score-label" }, c.label),
+      el("div", { class: "score-track" }, el("div", { class: "score-fill", style: `width:${v/5*100}%` })),
+      el("div", { class: "score-num" }, String(v)),
+    ]));
+  });
+
+  if (f.flags && f.flags.length > 0) {
+    const box = el("div", { class: "flag-box" });
+    box.appendChild(el("div", { class: "flag-title" }, "⚠ Grading consistency check"));
+    const ul = el("ul");
+    f.flags.forEach(fl => ul.appendChild(el("li", {}, fl)));
+    box.appendChild(ul);
+    scoreCard.appendChild(box);
+  }
+  right.appendChild(scoreCard);
+
+  const betterCard = el("div", { class: "card" });
+  betterCard.appendChild(el("h2", { class: "section-title" }, "A stronger version"));
+  betterCard.appendChild(el("div", { class: "better-version" }, f.betterVersion));
+  right.appendChild(betterCard);
+
+  grid.appendChild(right);
+  wrap.appendChild(grid);
+
+  const nextBtn = el("button", { onclick: () => nextQuestion() },
+    state.currentIndex < state.questions.length - 1 ? "Next question" : "Finish session");
+  const metricsBtn = el("button", { class: "ghost", onclick: () => { state.view = "metrics"; render(); } }, "View metrics");
+  wrap.appendChild(el("div", { class: "btn-row" }, [nextBtn, metricsBtn]));
+
+  return wrap;
+}
+
+// ---------- METRICS ----------
+function renderMetrics() {
+  const wrap = el("div");
+  wrap.appendChild(tabs("metrics"));
+  wrap.appendChild(el("p", { class: "eyebrow" }, "Session metrics"));
+  wrap.appendChild(el("h1", { style: "font-size:30px;" }, "How the practice is going"));
+
+  if (state.history.length === 0) {
+    wrap.appendChild(el("p", { class: "empty" }, "No answers scored yet — practice a question first."));
+    return wrap;
+  }
+
+  const n = state.history.length;
+  const avgOverall = state.history.reduce((s, h) => s + h.overall, 0) / n;
+  const flagged = state.history.filter(h => h.flags && h.flags.length > 0).length;
+  const flagRate = (flagged / n * 100).toFixed(0);
+
+  const statGrid = el("div", { class: "stat-grid" });
+  statGrid.appendChild(statCard(n, "Questions answered"));
+  statGrid.appendChild(statCard(avgOverall.toFixed(1), "Avg overall score"));
+  statGrid.appendChild(statCard(flagRate + "%", "Grading-flag rate"));
+  statGrid.appendChild(statCard(state.questions.length - state.currentIndex - (state.view === "metrics" ? 0 : 1), "Questions remaining"));
+  wrap.appendChild(statGrid);
+
+  const card = el("div", { class: "card" });
+  card.appendChild(el("h2", { class: "section-title" }, "Average by criterion"));
+  CRITERIA.forEach(c => {
+    const avg = state.history.reduce((s, h) => s + (h.scores[c.key] || 0), 0) / n;
+    card.appendChild(el("div", { class: "score-row" }, [
+      el("div", { class: "score-label" }, c.label),
+      el("div", { class: "score-track" }, el("div", { class: "score-fill", style: `width:${avg/5*100}%` })),
+      el("div", { class: "score-num" }, avg.toFixed(1)),
+    ]));
+  });
+  wrap.appendChild(card);
+
+  const trendCard = el("div", { class: "card" });
+  trendCard.appendChild(el("h2", { class: "section-title" }, "Overall score by attempt"));
+  trendCard.appendChild(sparkline(state.history.map(h => h.overall)));
+  wrap.appendChild(trendCard);
+
+  if (flagged > 0) {
+    const flagCard = el("div", { class: "card" });
+    flagCard.appendChild(el("h2", { class: "section-title" }, "Flagged gradings"));
+    flagCard.appendChild(el("p", { class: "lede", style: "margin-bottom:14px;" },
+      "Seven independent checks run against every grading — specificity, business impact, structure, ownership, trade-offs, answer length, and identical-score detection. These are the cases where the score and the answer's actual content didn't line up — a sign the AI grader itself may have been confidently wrong."));
+    state.history.filter(h => h.flags && h.flags.length > 0).forEach((h, i) => {
+      const box = el("div", { class: "flag-box", style: "margin-bottom:12px;" });
+      box.appendChild(el("div", { class: "flag-title" }, `Q: ${h.question.slice(0, 70)}${h.question.length > 70 ? "…" : ""}`));
+      const ul = el("ul");
+      h.flags.forEach(fl => ul.appendChild(el("li", {}, fl)));
+      box.appendChild(ul);
+      flagCard.appendChild(box);
+    });
+    wrap.appendChild(flagCard);
+  }
+
+  return wrap;
+}
+
+function statCard(num, lbl) {
+  return el("div", { class: "stat" }, [
+    el("div", { class: "num" }, String(num)),
+    el("div", { class: "lbl" }, lbl),
+  ]);
+}
+
+function sparkline(values) {
+  const w = Math.max(values.length * 60, 200), h = 100, pad = 16;
+  const max = 5, min = 0;
+  const pts = values.map((v, i) => {
+    const x = pad + i * ((w - pad * 2) / Math.max(values.length - 1, 1));
+    const y = h - pad - ((v - min) / (max - min)) * (h - pad * 2);
+    return [x, y];
+  });
+  const path = pts.map((p, i) => (i === 0 ? "M" : "L") + p[0] + "," + p[1]).join(" ");
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.setAttribute("width", w);
+  svg.setAttribute("height", h);
+  svg.innerHTML = `
+    <path d="${path}" fill="none" stroke="#D4A73D" stroke-width="2.5"/>
+    ${pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#EFE7D8"/>`).join("")}
+  `;
+  return svg;
+}
+
+function loadingRow(msg) {
+  return el("div", { class: "loading", style: "margin-top:14px;" }, [
+    el("div", { class: "spinner" }),
+    el("span", {}, msg || "Working..."),
+  ]);
+}
+
+function annotateHtml(text, annotations) {
+  if (!annotations || annotations.length === 0) return escapeHtml(text).replace(/\n/g, "<br>");
+  let html = escapeHtml(text);
+  annotations.forEach((a, i) => {
+    const quote = escapeHtml(a.quote || "");
+    if (!quote) return;
+    const idx = html.toLowerCase().indexOf(quote.toLowerCase());
+    if (idx === -1) return;
+    const before = html.slice(0, idx);
+    const match = html.slice(idx, idx + quote.length);
+    const after = html.slice(idx + quote.length);
+    html = before + `<mark class="${a.type}">` + match + `</mark>` + after;
+  });
+  return html.replace(/\n/g, "<br>");
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// ---------- Voice features ----------
+function speakQuestion(text) {
+  if (!("speechSynthesis" in window)) {
+    alert("Voice playback isn't supported in this browser — try Chrome or Edge.");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.98;
+  window.speechSynthesis.speak(utter);
+}
+
+// ---------- API + eval logic (calls our own local backend, not the AI provider directly) ----------
+async function apiPost(path, body) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error(`Server error ${response.status}. Check the terminal running app.py for details.`);
+  }
+  if (!response.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+async function generateQuestions() {
+  state.loading = true;
+  state.loadingMsg = "Writing role-specific questions...";
+  render();
+  try {
+    const questions = await apiPost("/api/questions", { role: state.role, context: state.context });
+    state.questions = questions;
+    state.currentIndex = 0;
+    state.answer = "";
+    state.loading = false;
+    state.view = "practice";
+    render();
+  } catch (e) {
+    state.loading = false;
+    state.error = "Couldn't generate questions — try again. (" + e.message + ")";
+    render();
+  }
+}
+
+function runConsistencyChecks(answer, scores, confidence) {
+  const flags = [];
+  const wordCount = answer.trim().split(/\s+/).length;
+  const hasNumbers = /\d|%|\$/.test(answer);
+  const impactWords = /(revenue|growth|retention|churn|users?|conversion|cost|efficien|arr|mrr|nps|engagement)/i;
+
+  if ((scores.specificity || 0) >= 4 && !hasNumbers) {
+    flags.push("Specificity scored 4+ but the answer contains no numbers, percentages, or metrics — score may be inflated.");
+  }
+  if ((scores.business_impact || 0) >= 4 && !impactWords.test(answer)) {
+    flags.push("Business Impact scored 4+ but no impact-related terms (revenue, growth, retention, etc.) appear in the answer.");
+  }
+  const avg = Object.values(scores).reduce((a, b) => a + b, 0) / Object.values(scores).length;
+  if (avg >= 4 && wordCount < 25) {
+    flags.push(`Overall score is high (${avg.toFixed(1)}/5) for a ${wordCount}-word answer — possible grading error on a thin response.`);
+  }
+  if (confidence && confidence <= 2 && avg >= 4) {
+    flags.push("The model rated its own confidence in this grading as low, despite giving high scores — treat this feedback cautiously.");
+  }
+
+  // Structure: high score should coincide with actual sequencing/causal language.
+  const structureMarkers = /(first|then|after that|next|because|as a result|so I|which led to|this resulted)/i;
+  if ((scores.structure || 0) >= 4 && !structureMarkers.test(answer)) {
+    flags.push("Structure scored 4+ but the answer has no sequencing or causal language (\"first\", \"as a result\", etc.) — may be graded on tone rather than actual structure.");
+  }
+
+  // Ownership: high score should coincide with first-person, decisive language.
+  const ownershipMarkers = /\bI\s+(decided|chose|prioritized|built|led|pushed|owned|drove|proposed)/i;
+  const teamOnly = /\b(we|the team|our team)\b/i.test(answer) && !ownershipMarkers.test(answer);
+  if ((scores.ownership || 0) >= 4 && teamOnly) {
+    flags.push("Ownership scored 4+ but the answer only uses team-level language (\"we\"/\"the team\") with no clear first-person decision — score may overstate individual ownership.");
+  }
+
+  // Trade-offs: high score should coincide with contrast/rejection language.
+  const tradeoffMarkers = /(instead of|rather than|versus|over|chose .* over|rejected|deprioritized|trade-?off|considered .* but)/i;
+  if ((scores.tradeoffs || 0) >= 4 && !tradeoffMarkers.test(answer)) {
+    flags.push("Trade-off Reasoning scored 4+ but no alternative or rejected option is named in the answer — there may be nothing to actually compare against.");
+  }
+
+  // Lazy grading: every criterion given the exact same score is a common LLM-judge failure mode.
+  const scoreValues = Object.values(scores);
+  if (scoreValues.length > 1 && scoreValues.every(v => v === scoreValues[0])) {
+    flags.push(`Every criterion scored identically (${scoreValues[0]}/5) — possibly a generic, non-differentiated grading pass rather than a genuine per-criterion assessment.`);
+  }
+
+  return flags;
+}
+
+async function evaluateAnswer() {
+  state.loading = true;
+  state.loadingMsg = "Scoring against the rubric...";
+  render();
+  try {
+    const q = state.questions[state.currentIndex];
+    const result = await apiPost("/api/evaluate", { question: q.question, answer: state.answer });
+
+    const flags = runConsistencyChecks(state.answer, result.scores, result.confidence);
+    const overall = Object.values(result.scores).reduce((a, b) => a + b, 0) / Object.values(result.scores).length;
+
+    state.currentFeedback = {
+      scores: result.scores,
+      overall: overall,
+      annotations: result.annotations || [],
+      betterVersion: result.stronger_version,
+      flags: flags,
+      confidence: result.confidence,
+    };
+    state.history.push({
+      question: q.question,
+      scores: result.scores,
+      overall: overall,
+      flags: flags,
+    });
+
+    state.loading = false;
+    state.view = "feedback";
+    render();
+  } catch (e) {
+    state.loading = false;
+    state.error = "Couldn't score that answer — try again. (" + e.message + ")";
+    render();
+  }
+}
+
+function nextQuestion() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  if (state.currentIndex < state.questions.length - 1) {
+    state.currentIndex += 1;
+    state.answer = "";
+    state.currentFeedback = null;
+    state.view = "practice";
+  } else {
+    state.view = "metrics";
+  }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

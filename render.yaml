@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: pm-interview-coach
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120
+    envVars:
+      - key: PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: LIMIT_PER_PERSON_PER_HOUR
+        value: "30"
+      - key: LIMIT_TOTAL_PER_DAY
+        value: "400"
